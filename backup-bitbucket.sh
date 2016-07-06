@@ -13,6 +13,9 @@
 # - PASSWORD: password of the user
 # - BACKUP_LOCATION: the base path to store the backup
 
+# Log start
+echo "==== START:" $(date -Iseconds) "===="
+
 # Check that `jq` dependency is met
 type jq >/dev/null 2>&1 || { echo >&2 "This script requires `jq` but it's not installed. Aborting."; exit 1; }
 
@@ -101,3 +104,6 @@ do
 	fi
 done
 IFS="$OIFS"
+
+# Log finish
+echo "==== FINISH:" $(date -Iseconds) "===="

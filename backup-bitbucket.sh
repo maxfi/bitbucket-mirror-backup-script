@@ -10,8 +10,27 @@
 #
 # variables that must be set
 # - USER_NAME: the user name
-# - API_KEY: api key of the user
+# - PASSWORD: password of the user
 # - BACKUP_LOCATION: the base path to store the backup
+
+# Check that `jq` dependency is met
+type jq >/dev/null 2>&1 || { echo >&2 "This script requires `jq` but it's not installed. Aborting."; exit 1; }
+
+# Check that user inputs are set
+if [ -z "$USER_NAME" ]; then
+	echo "Please set USER_NAME"
+	exit 1
+fi
+
+if [ -z "$PASSWORD" ]; then
+	echo "Please set PASSWORD"
+	exit 1
+fi
+
+if [ -z "$BACKUP_LOCATION" ]; then
+	echo "Please set BACKUP_LOCATION"
+	exit 1
+fi
 
 function backup_hg {
 	if [ -d "$1" ]; then
@@ -25,9 +44,9 @@ function backup_hg {
 function backup_git {
 	if [ -d "$1" ]; then
 		cd $1
-		git pull
+		git remote update
 	else
-		git clone -n git@bitbucket.org:$2 $1
+		git clone --mirror git@bitbucket.org:$2 $1
 	fi
 }
 
@@ -54,7 +73,7 @@ function backup_scm {
 
 mkdir -p $BACKUP_LOCATION
 
-repositories=`curl -s -S --user $USER_NAME:$API_KEY https://api.bitbucket.org/2.0/repositories/$USER_NAME\?pagelen\=100 | jq -r '.values[] | "\(.full_name) \(.scm) \(.has_issues) \(.has_wiki)"'`
+repositories=`curl -s -S --user $USER_NAME:$PASSWORD https://api.bitbucket.org/2.0/repositories/$USER_NAME\?pagelen\=100 | jq -r '.values[] | "\(.full_name) \(.scm) \(.has_issues) \(.has_wiki)"'`
 
 OIFS="$IFS"
 IFS=$'\n'
@@ -78,7 +97,7 @@ do
 		echo "backing up $repository_name issues"
 		ISSUES_BACKUP_LOCATION=$BACKUP_LOCATION/$repository_name/issues
 		mkdir -p $ISSUES_BACKUP_LOCATION
-		curl -s -S --user $USER_NAME:$API_KEY https://api.bitbucket.org/1.0/repositories/$repository_name/issues > $ISSUES_BACKUP_LOCATION/issues.json
+		curl -s -S --user $USER_NAME:$PASSWORD https://api.bitbucket.org/1.0/repositories/$repository_name/issues > $ISSUES_BACKUP_LOCATION/issues.json
 	fi
 done
 IFS="$OIFS"

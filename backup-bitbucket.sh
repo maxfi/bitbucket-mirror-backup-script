@@ -87,17 +87,17 @@ do
 	has_wiki=`echo $repository | cut -d ' ' -f4`
 	scm=`echo $repository | cut -d ' ' -f2`
 	
-	echo "backing up $repository_name"
-	echo "backing up $repository_name repo"
+	echo "====> backing up $repository_name"
+	echo "====> backing up $repository_name repo"
 	backup_scm $scm $repository_name repo
 	
 	if [ "true" = "$has_wiki" ]; then
-		echo "backing up $repository_name wiki"
+		echo "====> backing up $repository_name wiki"
 		backup_scm $scm $repository_name wiki
 	fi
 	
 	if [ "true" = "$has_issues" ]; then
-		echo "backing up $repository_name issues"
+		echo "====> backing up $repository_name issues"
 		ISSUES_BACKUP_LOCATION=$BACKUP_LOCATION/$repository_name/issues
 		mkdir -p $ISSUES_BACKUP_LOCATION
 		curl -s -S --user $USER_NAME:$PASSWORD https://api.bitbucket.org/1.0/repositories/$repository_name/issues > $ISSUES_BACKUP_LOCATION/issues.json
